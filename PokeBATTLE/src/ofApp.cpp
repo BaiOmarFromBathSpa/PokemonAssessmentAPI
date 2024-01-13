@@ -7,8 +7,17 @@ void ofApp::setup() {
     */
     json.open("https://pokeapi.co/api/v2/berry/cheri");//returns data on the Cheri Berry
     cout << json.getRawString() << endl;
+
     ofBackground(255,255,255);
-    Logo.load("PokeBattle_Logo.png");
+
+    Click2Play.load("Click2Play.png");
+    TopRightBtn.load("Icon_Close.png");
+    DifficultyBtn.load("Icon_Diffculty.png");
+
+    PokeStreak = 0000;
+    HintsRemaining = 0;
+    HighScore = 0000;
+    CurrPage = 1;
 }
 
 //--------------------------------------------------------------
@@ -18,19 +27,74 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    int CurrPage = 1;
+    int CurrHeight = ofGetHeight(), CurrWidth = ofGetWidth();
+    int PaddingPercent[4] = { 0,0,0,0 }; // 0-top 1-right 2-bottom 3-left - clockwise [moreso a nudge function but oh well... values are used as percentages]
+
     if (CurrPage == 1) {
-        int CurrHeight = ofGetHeight(), CurrWidth = ofGetWidth();
-        int PaddingPercent[4] = {0,0,0,0};
         Accent1.set(255, 203, 5);
         Accent2.set(50, 105, 177);
 
         DrawBG(Accent1, Accent2);
 
-        PaddingPercent[0] = 15; //set padding before going into function - it gets reset within the function hurray pointers
-        DrawImage(Logo, 90, 0, 'c', 't', &PaddingPercent[0]); //fix tomorrow getting late late
+        StaticImgLoader.load("PokeBattle_Logo.png");
+        PaddingPercent[0] = 15; //set padding before going into function - it gets reset within the function... hurray pointers
+        DrawImage(StaticImgLoader, 90, 0, 'c', 't', &PaddingPercent[0]); //fix tomorrow getting late late
 
+        PaddingPercent[2] = 33;
+        DrawImage(Click2Play, 30, 0, 'c', 'b', &PaddingPercent[0]);
+
+        PaddingPercent[0] = 2;
+        PaddingPercent[1] = 1;
+        DrawImage(TopRightBtn, 4, 0, 'r', 't', &PaddingPercent[0]);
+
+        PaddingPercent[1] = 1;
+        PaddingPercent[2] = 33;
+        DrawImage(DifficultyBtn, 13, 0, 'r', 'b', &PaddingPercent[0]);
     }
+    else if (CurrPage == 2) {
+        Accent1.set(75, 75, 75);
+        Accent2.set(75, 75, 75);
+
+        DrawBG(Accent1, Accent2);
+
+        StaticImgLoader.load("PokeBattle_Logo.png");
+        PaddingPercent[0] = 3;
+        PaddingPercent[3] = 5;
+        DrawImage(StaticImgLoader, 50, 0, 'l', 't', &PaddingPercent[0]);
+
+        TopRightBtn.load("Icon_Back.png");
+        PaddingPercent[0] = 2;
+        PaddingPercent[1] = 1;
+        DrawImage(TopRightBtn, 5, 0, 'r', 't', &PaddingPercent[0]);
+    }
+    else if (CurrPage == 3) {
+        Accent1.set(75, 75, 75);
+        Accent2.set(75, 75, 75);
+
+        DrawBG(Accent1, Accent2);
+
+        ofSetColor(255,255,255);
+        Font_Inter.load("TurpisItalic.ttf", 40);
+        Font_Inter.drawString("Poke-Streak:", 39, 60);
+
+        Font_Inter.load("TurpisItalic.ttf", 24);
+        Font_Inter.drawString("Hints:", 34, 90);
+
+        ofSetColor(255, 255, 255);
+        Font_Inter.load("TurpisItalic.ttf", 36);
+        Font_Inter.drawString("Hi-Sco:", 25, 130);
+
+        ofSetColor(222, 90, 58);
+        Font_Inter.load("TurpisItalic.ttf", 96);
+        Font_Inter.drawString(to_string(PokeStreak), 380, 110);
+
+        Font_Inter.load("TurpisItalic.ttf", 55);
+        Font_Inter.drawString(to_string(0000), 195, 133);
+
+        Font_Inter.load("TurpisItalic.ttf", 26);
+        Font_Inter.drawString(to_string(HintsRemaining), 132, 92);
+    }
+    
 }
 void ofApp::DrawBG(ofColor Col1, ofColor Col2) {
     int CurrHeight = ofGetHeight(), CurrWidth = ofGetWidth();
@@ -118,7 +182,7 @@ void ofApp::DrawImage(ofImage aImage, int widthPercent, int heightPercent, char 
         PaddingTop += (CurrHeight / 2) - (((heightPercent * CurrHeight) / 100) / 2);
         break;
     case 'b':
-        PaddingTop = (CurrHeight + ((heightPercent * CurrHeight) / 100)) + PaddingTop;
+        PaddingTop = (CurrHeight - ((heightPercent * CurrHeight) / 100)) + PaddingTop;
         break;
     case 't': default:
         break;
@@ -129,7 +193,8 @@ void ofApp::DrawImage(ofImage aImage, int widthPercent, int heightPercent, char 
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-
+    CurrPage++;
+    if (CurrPage > 3) CurrPage = 1;
 }
 
 //--------------------------------------------------------------
