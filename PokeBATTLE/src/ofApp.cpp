@@ -28,7 +28,7 @@ void ofApp::draw() {
         DrawBG(Accent1, Accent2);
 
         PaddingPercent[0] = 15; //set padding before going into function - it gets reset within the function hurray pointers
-        DrawImage(Logo, 90, 0, 'r', 't', &PaddingPercent[0]); //fix tomorrow getting late late
+        DrawImage(Logo, 90, 0, 'c', 't', &PaddingPercent[0]); //fix tomorrow getting late late
 
     }
 }
@@ -103,7 +103,7 @@ void ofApp::DrawImage(ofImage aImage, int widthPercent, int heightPercent, char 
         PaddingLeft += (CurrWidth / 2) - (((widthPercent * CurrWidth) / 100) / 2); //if centering get half ofscreen minus half of image width
         break;
     case 'r':
-        PaddingLeft = (CurrWidth - ((widthPercent * CurrWidth) / 100)) - ((PaddingLeft * CurrWidth) / 100); //if right then get whole screen minus size of element
+        PaddingLeft = (CurrWidth - ((widthPercent * CurrWidth) / 100)) + PaddingLeft; //if right then get whole screen minus size of element
         break;
     case 'l': default:
         break;
@@ -118,7 +118,7 @@ void ofApp::DrawImage(ofImage aImage, int widthPercent, int heightPercent, char 
         PaddingTop += (CurrHeight / 2) - (((heightPercent * CurrHeight) / 100) / 2);
         break;
     case 'b':
-        PaddingTop = (CurrHeight + ((heightPercent * CurrHeight) / 100)) - PaddingTop;
+        PaddingTop = (CurrHeight + ((heightPercent * CurrHeight) / 100)) + PaddingTop;
         break;
     case 't': default:
         break;
