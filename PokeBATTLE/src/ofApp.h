@@ -15,6 +15,10 @@ public:
 	void mousePressed(int x, int y, int button);
 	void mouseReleased(int x, int y, int button);
 
+	void DrawBG(ofColor Col1, ofColor Col2);
+	void DrawImage(ofImage aImage, int width /* = 0 */, int height /* = 0 */, char alignX /* = 'n' */, char alignY /* = 'n' */, int*Padding);
+	// it appears openframeworks doesn't like default values... since they are custom functions ill put the default values whenever i call them with "my defaults" :|
 	ofxJSONElement json;//stores data from API
-	ofColor GradTop = (255, 203, 5), GradBtm = (50, 105, 177);
+	ofColor Accent1, Accent2;
+	ofImage Logo;
 };
