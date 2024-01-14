@@ -5,19 +5,14 @@ void ofApp::setup() {
     /*
      API documentation can be found at: https://pokeapi.co/docs/v2
     */
-    json.open("https://pokeapi.co/api/v2/berry/cheri");//returns data on the Cheri Berry
-    cout << json.getRawString() << endl;
-
-    ofBackground(255,255,255);
-
-    Click2Play.load("Click2Play.png");
-    TopRightBtn.load("Icon_Close.png");
-    DifficultyBtn.load("Icon_Diffculty.png");
+    PokeAPI.open("https://pokeapi.co/api/v2/berry/cheri");//returns data on the Cheri Berry
+    cout << PokeAPI.getRawString() << endl;
 
     PokeStreak = 0000;
     HintsRemaining = 0;
     HighScore = 0000;
-    CurrPage = 1;
+    CurrPage = Pages::MainMenu;
+    DifficultyOption = 0;
 }
 
 //--------------------------------------------------------------
@@ -28,9 +23,13 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
     int CurrHeight = ofGetHeight(), CurrWidth = ofGetWidth();
-    int PaddingPercent[4] = { 0,0,0,0 }; // 0-top 1-right 2-bottom 3-left - clockwise [moreso a nudge function but oh well... values are used as percentages]
+    int PaddingPercent[4] = {0,0,0,0}; // 0-top 1-right 2-bottom 3-left - clockwise [moreso a nudge function but oh well... values are used as percentages]
+    
+    ofRectangle NewButton;
+    Buttons.clear();
 
-    if (CurrPage == 1) {
+    switch (CurrPage) {
+    case Pages::MainMenu:
         Accent1.set(255, 203, 5);
         Accent2.set(50, 105, 177);
 
@@ -40,18 +39,38 @@ void ofApp::draw() {
         PaddingPercent[0] = 15; //set padding before going into function - it gets reset within the function... hurray pointers
         DrawImage(StaticImgLoader, 90, 0, 'c', 't', &PaddingPercent[0]); //fix tomorrow getting late late
 
+        Click2Play.load("Click2Play.png");
         PaddingPercent[2] = 33;
-        DrawImage(Click2Play, 30, 0, 'c', 'b', &PaddingPercent[0]);
+        NewButton = DrawImage(Click2Play, 30, 0, 'c', 'b', &PaddingPercent[0]);
+        Buttons.push_back(make_pair(AllButtons::Click2Play, NewButton));
 
+        TopRightBtn.load("Icon_Close.png");
         PaddingPercent[0] = 2;
         PaddingPercent[1] = 1;
-        DrawImage(TopRightBtn, 4, 0, 'r', 't', &PaddingPercent[0]);
+        NewButton = DrawImage(TopRightBtn, 4, 0, 'r', 't', &PaddingPercent[0]);
+        Buttons.push_back(make_pair(AllButtons::TopRightBtn, NewButton));
+
+        switch (DifficultyOption){
+        case 1:
+            //DifficultyBtn.load("Icon_Diffculty_Medium_Alt.png");
+            DifficultyBtn.load("Icon_Diffculty_Medium.png");
+            break;
+        case 2:
+            DifficultyBtn.load("Icon_Diffculty_Hard.png");
+            break;
+        case 0: default:
+            DifficultyBtn.load("Icon_Diffculty_Easy.png");
+            break;
+        }
 
         PaddingPercent[1] = 1;
         PaddingPercent[2] = 33;
-        DrawImage(DifficultyBtn, 13, 0, 'r', 'b', &PaddingPercent[0]);
-    }
-    else if (CurrPage == 2) {
+        NewButton = DrawImage(DifficultyBtn, 14, 0, 'r', 'b', &PaddingPercent[0]);
+        Buttons.push_back(make_pair(AllButtons::DifficultyBtn, NewButton));
+
+        break;
+
+    case Pages::PickPokemon:
         Accent1.set(75, 75, 75);
         Accent2.set(75, 75, 75);
 
@@ -65,37 +84,45 @@ void ofApp::draw() {
         TopRightBtn.load("Icon_Back.png");
         PaddingPercent[0] = 2;
         PaddingPercent[1] = 1;
-        DrawImage(TopRightBtn, 5, 0, 'r', 't', &PaddingPercent[0]);
-    }
-    else if (CurrPage == 3) {
+        NewButton = DrawImage(TopRightBtn, 6, 0, 'r', 't', &PaddingPercent[0]);
+        Buttons.push_back(make_pair(AllButtons::TopRightBtn, NewButton));
+        break;
+
+    case Pages::BattleScene:
         Accent1.set(75, 75, 75);
         Accent2.set(75, 75, 75);
 
         DrawBG(Accent1, Accent2);
 
-        ofSetColor(255,255,255);
-        Font_Inter.load("TurpisItalic.ttf", 40);
-        Font_Inter.drawString("Poke-Streak:", 39, 60);
+        ofSetColor(255, 255, 255);
+        Font_Selector.load("TurpisItalic.ttf", 40);
+        Font_Selector.drawString("Poke-Streak:", 39, 60);
 
-        Font_Inter.load("TurpisItalic.ttf", 24);
-        Font_Inter.drawString("Hints:", 34, 90);
+        Font_Selector.load("TurpisItalic.ttf", 24);
+        Font_Selector.drawString("Hints:", 34, 90);
 
         ofSetColor(255, 255, 255);
-        Font_Inter.load("TurpisItalic.ttf", 36);
-        Font_Inter.drawString("Hi-Sco:", 25, 130);
+        Font_Selector.load("TurpisItalic.ttf", 36);
+        Font_Selector.drawString("Hi-Sco:", 25, 130);
 
         ofSetColor(222, 90, 58);
-        Font_Inter.load("TurpisItalic.ttf", 96);
-        Font_Inter.drawString(to_string(PokeStreak), 380, 110);
+        Font_Selector.load("TurpisItalic.ttf", 96);
+        Font_Selector.drawString(to_string(PokeStreak), 380, 110);
 
-        Font_Inter.load("TurpisItalic.ttf", 55);
-        Font_Inter.drawString(to_string(0000), 195, 133);
+        Font_Selector.load("TurpisItalic.ttf", 55);
+        Font_Selector.drawString(to_string(0000), 195, 133);
 
-        Font_Inter.load("TurpisItalic.ttf", 26);
-        Font_Inter.drawString(to_string(HintsRemaining), 132, 92);
+        Font_Selector.load("TurpisItalic.ttf", 26);
+        Font_Selector.drawString(to_string(HintsRemaining), 132, 92);
+        break;
+
+    default:
+        break;
     }
-    
+
+    ofSetColor(255); //reset colours after every page
 }
+
 void ofApp::DrawBG(ofColor Col1, ofColor Col2) {
     int CurrHeight = ofGetHeight(), CurrWidth = ofGetWidth();
     int Height34p = (33 * CurrHeight) / 100; //using to simulate 1/3 of screen height in int form
@@ -132,7 +159,7 @@ void ofApp::DrawBG(ofColor Col1, ofColor Col2) {
     Gradient.draw(); //draw mesh
 }
 
-void ofApp::DrawImage(ofImage aImage, int widthPercent, int heightPercent, char alignX, char alignY, int* PaddingPtr) {
+ofRectangle ofApp::DrawImage(ofImage aImage, int widthPercent, int heightPercent, char alignX, char alignY, int* PaddingPtr) {
     /* Arguments Explains
         1 - Image being used
         2 - percentage of width of screen to occupy [ if set to 0 set at native res - recent fix i was going to make it invisible ]
@@ -189,12 +216,15 @@ void ofApp::DrawImage(ofImage aImage, int widthPercent, int heightPercent, char 
     }   
     
     aImage.draw(PaddingLeft, PaddingTop, ((widthPercent * CurrWidth) / 100), ((heightPercent * CurrWidth) / 100));
+
+    ofRectangle ImgLocation;
+    ImgLocation.set(PaddingLeft, PaddingTop, ((widthPercent * CurrWidth) / 100), ((heightPercent * CurrWidth) / 100));
+    return ImgLocation;
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-    CurrPage++;
-    if (CurrPage > 3) CurrPage = 1;
+    OF_EXIT_APP(0);
 }
 
 //--------------------------------------------------------------
@@ -204,7 +234,41 @@ void ofApp::keyReleased(int key) {
 
 //-----------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
+    if (button != 0) return; //check if left click
+    AllButtons Pressed = AllButtons::none;
+    for (int i = 0; i < Buttons.size(); i++) {
+        if (Buttons[i].second.inside(x, y)) {
+            Pressed = Buttons[i].first; //its an enum so idk
+            break;
+        }
+    }
+    
+    switch (Pressed) {
+    case AllButtons::none: 
+        return;
+    case AllButtons::Click2Play:
+        CurrPage = Pages::PickPokemon;
+        break;
+    case AllButtons::TopRightBtn:
+        switch (CurrPage) {
+        case Pages::MainMenu:
+            OF_EXIT_APP(0);
+        case Pages::PickPokemon:
+            CurrPage = Pages::MainMenu;
+            break;
+        case Pages::BattleScene:
+            break;
+        }
+        break;
 
+    case AllButtons::DifficultyBtn:
+        DifficultyOption++;
+        if (DifficultyOption > 2)
+            DifficultyOption = 0;
+        break;
+    default:
+        break;
+    }
 }
 
 //--------------------------------------------------------------
