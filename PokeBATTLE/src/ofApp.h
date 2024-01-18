@@ -4,6 +4,20 @@
 #include "ofxJSON.h"
 #include "vector"
 
+class DrawAnImage : public ofImage {
+	ofImage Picture;
+	ofRectangle HitBox;
+	int OffsetX, OffsetY, Width, Height; //not to maintain just writing these out
+	bool MaintainAspectRatio, isButton;
+	char AlignX, AlignY;
+
+	public:
+		DrawAnImage() {
+			Width = ofGetHeight();
+		};
+};
+
+
 class ofApp : public ofBaseApp {
 
 public:

@@ -13,6 +13,11 @@ void ofApp::setup() {
     HighScore = 0000;
     CurrPage = Pages::MainMenu;
     DifficultyOption = 0;
+
+    DifficultyBtn.load("Icon_Diffculty_Easy.png");
+    Click2Play.load("Click2Play.png");
+    TopRightBtn.load("Icon_Close.png");
+    DrawAnImage();
 }
 
 //--------------------------------------------------------------
@@ -39,29 +44,14 @@ void ofApp::draw() {
         PaddingPercent[0] = 15; //set padding before going into function - it gets reset within the function... hurray pointers
         DrawImage(StaticImgLoader, 90, 0, 'c', 't', &PaddingPercent[0]); //fix tomorrow getting late late
 
-        Click2Play.load("Click2Play.png");
         PaddingPercent[2] = 33;
         NewButton = DrawImage(Click2Play, 30, 0, 'c', 'b', &PaddingPercent[0]);
         Buttons.push_back(make_pair(AllButtons::Click2Play, NewButton));
 
-        TopRightBtn.load("Icon_Close.png");
         PaddingPercent[0] = 2;
         PaddingPercent[1] = 1;
         NewButton = DrawImage(TopRightBtn, 4, 0, 'r', 't', &PaddingPercent[0]);
         Buttons.push_back(make_pair(AllButtons::TopRightBtn, NewButton));
-
-        switch (DifficultyOption){
-        case 1:
-            //DifficultyBtn.load("Icon_Diffculty_Medium_Alt.png");
-            DifficultyBtn.load("Icon_Diffculty_Medium.png");
-            break;
-        case 2:
-            DifficultyBtn.load("Icon_Diffculty_Hard.png");
-            break;
-        case 0: default:
-            DifficultyBtn.load("Icon_Diffculty_Easy.png");
-            break;
-        }
 
         PaddingPercent[1] = 1;
         PaddingPercent[2] = 33;
@@ -81,7 +71,6 @@ void ofApp::draw() {
         PaddingPercent[3] = 5;
         DrawImage(StaticImgLoader, 50, 0, 'l', 't', &PaddingPercent[0]);
 
-        TopRightBtn.load("Icon_Back.png");
         PaddingPercent[0] = 2;
         PaddingPercent[1] = 1;
         NewButton = DrawImage(TopRightBtn, 6, 0, 'r', 't', &PaddingPercent[0]);
@@ -214,7 +203,7 @@ ofRectangle ofApp::DrawImage(ofImage aImage, int widthPercent, int heightPercent
     case 't': default:
         break;
     }   
-    
+
     aImage.draw(PaddingLeft, PaddingTop, ((widthPercent * CurrWidth) / 100), ((heightPercent * CurrWidth) / 100));
 
     ofRectangle ImgLocation;
@@ -234,7 +223,8 @@ void ofApp::keyReleased(int key) {
 
 //-----------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
-    if (button != 0) return; //check if left click
+    if (button != 0) return; //check if left click return if not (no right clicking in my app)
+    
     AllButtons Pressed = AllButtons::none;
     for (int i = 0; i < Buttons.size(); i++) {
         if (Buttons[i].second.inside(x, y)) {
@@ -248,6 +238,7 @@ void ofApp::mousePressed(int x, int y, int button) {
         return;
     case AllButtons::Click2Play:
         CurrPage = Pages::PickPokemon;
+        TopRightBtn.load("Icon_Back.png");
         break;
     case AllButtons::TopRightBtn:
         switch (CurrPage) {
@@ -255,6 +246,7 @@ void ofApp::mousePressed(int x, int y, int button) {
             OF_EXIT_APP(0);
         case Pages::PickPokemon:
             CurrPage = Pages::MainMenu;
+            TopRightBtn.load("Icon_Close.png");
             break;
         case Pages::BattleScene:
             break;
@@ -263,9 +255,19 @@ void ofApp::mousePressed(int x, int y, int button) {
 
     case AllButtons::DifficultyBtn:
         DifficultyOption++;
-        if (DifficultyOption > 2)
+        switch (DifficultyOption) {
+        case 1:
+            //DifficultyBtn.load("Icon_Diffculty_Medium_Alt.png");
+            DifficultyBtn.load("Icon_Diffculty_Medium.png");
+            break;
+        case 2:
+            DifficultyBtn.load("Icon_Diffculty_Hard.png");
+            break;
+        case 0: default:
             DifficultyOption = 0;
-        break;
+            DifficultyBtn.load("Icon_Diffculty_Easy.png");
+            break;
+        }
     default:
         break;
     }
