@@ -5,19 +5,21 @@ void ofApp::setup() {
     /*
      API documentation can be found at: https://pokeapi.co/docs/v2
     */
-    PokeAPI.open("https://pokeapi.co/api/v2/berry/cheri");//returns data on the Cheri Berry
-    cout << PokeAPI.getRawString() << endl;
+    //PokeAPI.open("https://pokeapi.co/api/v2/berry/cheri");//returns data on the Cheri Berry
+    //cout << PokeAPI.getRawString() << endl;
 
-    PokeStreak = 0000;
-    HintsRemaining = 0;
-    HighScore = 0000;
+    ScreenX = ofGetWidth(); ScreenY = ofGetHeight();
     CurrPage = Pages::MainMenu;
-    DifficultyOption = 0;
 
-    DifficultyBtn.load("Icon_Diffculty_Easy.png");
+    PokeStreak = 0;
+    HintsRemaining = 4;
+    HighScore = 9909;
+    PokeSelected.reserve(6);
+
+    StaticImgLoader.load("PokeBattle_Logo.png");
     Click2Play.load("Click2Play.png");
     TopRightBtn.load("Icon_Close.png");
-    DrawAnImage();
+    DifficultyBtn.load("Icon_Diffculty_Easy.png");
 }
 
 //--------------------------------------------------------------
@@ -27,88 +29,113 @@ void ofApp::update() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-    int CurrHeight = ofGetHeight(), CurrWidth = ofGetWidth();
-    int PaddingPercent[4] = {0,0,0,0}; // 0-top 1-right 2-bottom 3-left - clockwise [moreso a nudge function but oh well... values are used as percentages]
-    
-    ofRectangle NewButton;
-    Buttons.clear();
+    ofRectangle Button;
+    ButtonsCont.clear();
 
     switch (CurrPage) {
     case Pages::MainMenu:
         Accent1.set(255, 203, 5);
         Accent2.set(50, 105, 177);
-
         DrawBG(Accent1, Accent2);
 
-        StaticImgLoader.load("PokeBattle_Logo.png");
-        PaddingPercent[0] = 15; //set padding before going into function - it gets reset within the function... hurray pointers
-        DrawImage(StaticImgLoader, 90, 0, 'c', 't', &PaddingPercent[0]); //fix tomorrow getting late late
+        
+        StaticImgLoader.draw(55, 90, 1170, 255);
+        
+        Click2Play.draw(330, 380, 620, 220);
+        Button.set(330, 380, 620, 220);
+        ButtonsCont.push_back(make_pair(AllButtons::Click2Play, Button));
 
-        PaddingPercent[2] = 33;
-        NewButton = DrawImage(Click2Play, 30, 0, 'c', 'b', &PaddingPercent[0]);
-        Buttons.push_back(make_pair(AllButtons::Click2Play, NewButton));
+        TopRightBtn.draw((ScreenX - TopRightBtn.getWidth() - 15), 15, TopRightBtn.getWidth(), 50);
+        Button.set((ScreenX - TopRightBtn.getWidth() - 15), 15, TopRightBtn.getWidth(), 50);
+        ButtonsCont.push_back(make_pair(AllButtons::TopRightBtn, Button));
 
-        PaddingPercent[0] = 2;
-        PaddingPercent[1] = 1;
-        NewButton = DrawImage(TopRightBtn, 4, 0, 'r', 't', &PaddingPercent[0]);
-        Buttons.push_back(make_pair(AllButtons::TopRightBtn, NewButton));
-
-        PaddingPercent[1] = 1;
-        PaddingPercent[2] = 33;
-        NewButton = DrawImage(DifficultyBtn, 14, 0, 'r', 'b', &PaddingPercent[0]);
-        Buttons.push_back(make_pair(AllButtons::DifficultyBtn, NewButton));
-
+        DifficultyBtn.draw(1060, 465, 200, 65);
+        Button.set(1060, 465, 200, 65);
+        ButtonsCont.push_back(make_pair(AllButtons::DifficultyBtn, Button));
         break;
-
-    case Pages::PickPokemon:
+    case Pages::PickPokemon: //TODO: move methods for pages into their own function
         Accent1.set(75, 75, 75);
         Accent2.set(75, 75, 75);
-
+        
         DrawBG(Accent1, Accent2);
-
+        
         StaticImgLoader.load("PokeBattle_Logo.png");
-        PaddingPercent[0] = 3;
-        PaddingPercent[3] = 5;
-        DrawImage(StaticImgLoader, 50, 0, 'l', 't', &PaddingPercent[0]);
+        StaticImgLoader.draw(50,10,585,135);
+        
+        TopRightBtn.draw((ScreenX - TopRightBtn.getWidth() - 15), 15, TopRightBtn.getWidth(), 50);
+        Button.set((ScreenX - TopRightBtn.getWidth() - 15), 15, TopRightBtn.getWidth(), 50);
+        ButtonsCont.push_back(make_pair(AllButtons::TopRightBtn, Button));
 
-        PaddingPercent[0] = 2;
-        PaddingPercent[1] = 1;
-        NewButton = DrawImage(TopRightBtn, 6, 0, 'r', 't', &PaddingPercent[0]);
-        Buttons.push_back(make_pair(AllButtons::TopRightBtn, NewButton));
-        break;
-
-    case Pages::BattleScene:
-        Accent1.set(75, 75, 75);
-        Accent2.set(75, 75, 75);
-
-        DrawBG(Accent1, Accent2);
+        ofSetColor(255, 255, 255);
+        Font_Selector.load("Jura-Medium.ttf", 24);
+        Font_Selector.drawString("CHOOSE YOUR TEAM", 319, 144);
 
         ofSetColor(255, 255, 255);
         Font_Selector.load("TurpisItalic.ttf", 40);
-        Font_Selector.drawString("Poke-Streak:", 39, 60);
-
-        Font_Selector.load("TurpisItalic.ttf", 24);
-        Font_Selector.drawString("Hints:", 34, 90);
-
-        ofSetColor(255, 255, 255);
-        Font_Selector.load("TurpisItalic.ttf", 36);
-        Font_Selector.drawString("Hi-Sco:", 25, 130);
+        Font_Selector.drawString("Pokemon-Left:", 750, 140);
 
         ofSetColor(222, 90, 58);
-        Font_Selector.load("TurpisItalic.ttf", 96);
-        Font_Selector.drawString(to_string(PokeStreak), 380, 110);
+        Font_Selector.load("TurpisItalic.ttf", 80);
+        Font_Selector.drawString(to_string(PokemonLeft), 1126, 170);
 
-        Font_Selector.load("TurpisItalic.ttf", 55);
-        Font_Selector.drawString(to_string(0000), 195, 133);
+        ofSetColor(0);
+        ofFill();
+        ofDrawRectRounded(10, 155, 1105, 12, 6);
+        ofDrawRectangle(20, 155, 1095, 12);
+        ofDrawRectRounded(1205, 155, 65, 12, 6);
+        ofDrawRectangle(1205, 155, 55, 12);
+        ofDrawRectRounded(1050, 180, 300, 700, 3);
+        
+        
+        ofSetColor(255);
+        ofFill();
+        ofDrawRectRounded(13, 158, 1099, 6, 4);
+        ofDrawRectangle(23, 158, 1089, 6);
+        ofDrawRectRounded(1208, 158, 59, 6, 4);
+        ofDrawRectangle(1208, 158, 49, 6);
+        ofDrawRectRounded(1053, 183, 300, 700, 3);
 
-        Font_Selector.load("TurpisItalic.ttf", 26);
-        Font_Selector.drawString(to_string(HintsRemaining), 132, 92);
+        ofPushMatrix();
+            ofTranslate(10, 180);
+            for (int i = 0; i < Rows; i++) {
+                for (int j = 0; j < Columns; j++) {
+                    string PokeLocation = "sprites/" + to_string((i*Columns+j)+Offset) + "/front.png";
+
+                    Accent1.set(255);
+                    auto it = find(PokeSelected.begin(), PokeSelected.end(), (i * Columns + j) + Offset);
+                    if (it != PokeSelected.end()) Accent1.set(0, 130, 255);
+
+                    StaticImgLoader.load(PokeLocation);
+                    ofSetColor(0);
+                    ofFill();
+                    ofDrawRectRounded((FrameX+Gap)*j, (FrameY + Gap) * i, FrameX, FrameY, 4);
+                    ofSetColor(Accent1);
+                    ofFill();
+                    ofDrawRectRounded(((FrameX + Gap) * j)+3, ((FrameY + Gap) * i)+3, FrameX - 6, FrameY - 6, 3);
+                    ofSetColor(255);
+                    StaticImgLoader.draw((FrameX + Gap) * j, (FrameY + Gap) * i, FrameX, FrameY);
+                }
+            }
+        ofPopMatrix();
+        Button.set(10, 180, (80 * ScreenX) / 100, (70 * ScreenY) / 100);
+        ButtonsCont.push_back(make_pair(AllButtons::PokeSelectGrid, Button));
+
+        ofPushMatrix();
+            ofTranslate(40,690);
+            ofScale(-1, 1);
+            StaticImgLoader.load("Icon_Play.png");
+            StaticImgLoader.draw(0, 0, 25, 25);
+        ofPopMatrix();
+        Button.set(40, 690, 25, 25);
+        ButtonsCont.push_back(make_pair(AllButtons::PrevPage, Button));
+
+        StaticImgLoader.draw(1000, 690, 25, 25);
+        Button.set(1000, 690, 25, 25);
+        ButtonsCont.push_back(make_pair(AllButtons::NextPage, Button));
         break;
-
-    default:
+    case Pages::BattleScene:
         break;
     }
-
     ofSetColor(255); //reset colours after every page
 }
 
@@ -132,10 +159,10 @@ void ofApp::DrawBG(ofColor Col1, ofColor Col2) {
     Gradient.addVertex(ofVec3f(CurrWidth, Height34p, 0)); //vert4 right - 1/3 down
     Gradient.addColor(Col1);
 
-    Gradient.addVertex(ofVec3f(0, Height34p * 2, 0));  //vert5 left - 2/3 down
+    Gradient.addVertex(ofVec3f(0, (Height34p * 2)+15, 0));  //vert5 left - 2/3 down
     Gradient.addColor(ofColor(255, 255, 255));
 
-    Gradient.addVertex(ofVec3f(CurrWidth, Height34p * 2, 0));  //vert6 right - 2/3 down
+    Gradient.addVertex(ofVec3f(CurrWidth, (Height34p * 2)+15, 0));  //vert6 right - 2/3 down
     Gradient.addColor(ofColor(255, 255, 255));
 
     Gradient.addVertex(ofVec3f(0, CurrHeight, 0));  //vert7 left - down
@@ -149,66 +176,8 @@ void ofApp::DrawBG(ofColor Col1, ofColor Col2) {
 }
 
 ofRectangle ofApp::DrawImage(ofImage aImage, int widthPercent, int heightPercent, char alignX, char alignY, int* PaddingPtr) {
-    /* Arguments Explains
-        1 - Image being used
-        2 - percentage of width of screen to occupy [ if set to 0 set at native res - recent fix i was going to make it invisible ]
-        3 - percentage of height of screen to occupy [ <= 0 to maintain native image aspect ratio ]
-        4 - Align on the x axis of the screen [ l - left(default) | c - center | r - right] <- invalid syntax is set to default
-        5 - Align on the y axis of the screen [ t - top(default) | c - center | b - bottom] <- invalid syntax is set to default 
-        6 - Padding of element... basically lets you nudge is a little bit - takes in a array technically but issues so pointer to first element in array of 4 [you can go higher they'll just be ignored] */
-
-    int Padding[4]; //4 bytes of data duplicated for a a few milisecs its ok
-    for (int i = 0; i < 4; i++) {
-        Padding[i] = *PaddingPtr; //There is probably a more efficient way but i cant pass arrays and am bad at pointers and lightly frustrated it's almost 3am
-        *PaddingPtr = 0;          //reset padding when no longer in use
-        PaddingPtr++;
-    }
-
-    if (widthPercent <= 0) //set to native if unset
-        widthPercent = ((aImage.getWidth() * 100) / ofGetWidth());
-
-    if (alignX != 'l')
-        if (alignX != 'r' && alignX != 'c') alignX = 'l';
-    if (alignY != 't')
-        if (alignY != 'b' && alignY != 'c') alignY = 't';
-
-    /* ^ Set Default Values ^ */
-
-    double aspectRatio = aImage.getHeight() / aImage.getWidth(); //get native images aspect ratio
-    int CurrHeight = ofGetHeight(), CurrWidth = ofGetWidth();   //i assume these functions can be computationally expensive if run every frame so minimising their call count
-    int PaddingLeft = ((Padding[3] - Padding[1]) * CurrWidth) / 100, PaddingTop = ((Padding[0] - Padding[2]) * CurrHeight) / 100; //collapse padding because only the top and left matter (positioning when drawing image)
-    
-    switch (alignX) {
-    case 'c':
-        PaddingLeft += (CurrWidth / 2) - (((widthPercent * CurrWidth) / 100) / 2); //if centering get half ofscreen minus half of image width
-        break;
-    case 'r':
-        PaddingLeft = (CurrWidth - ((widthPercent * CurrWidth) / 100)) + PaddingLeft; //if right then get whole screen minus size of element
-        break;
-    case 'l': default:
-        break;
-    }
-    
-    if (heightPercent <= 0) {//if height unset maintain aspect ratio
-        heightPercent = widthPercent * aspectRatio;
-    }
-
-    switch (alignY) { //sucks repeating code but hardly worth the trouble of nested functions
-    case 'c':
-        PaddingTop += (CurrHeight / 2) - (((heightPercent * CurrHeight) / 100) / 2);
-        break;
-    case 'b':
-        PaddingTop = (CurrHeight - ((heightPercent * CurrHeight) / 100)) + PaddingTop;
-        break;
-    case 't': default:
-        break;
-    }   
-
-    aImage.draw(PaddingLeft, PaddingTop, ((widthPercent * CurrWidth) / 100), ((heightPercent * CurrWidth) / 100));
-
-    ofRectangle ImgLocation;
-    ImgLocation.set(PaddingLeft, PaddingTop, ((widthPercent * CurrWidth) / 100), ((heightPercent * CurrWidth) / 100));
-    return ImgLocation;
+    ofRectangle SOmething;
+    return SOmething;
 }
 
 //--------------------------------------------------------------
@@ -223,22 +192,46 @@ void ofApp::keyReleased(int key) {
 
 //-----------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
+    cout << "Pressed: x-" << x << " | y-" << y << endl;
     if (button != 0) return; //check if left click return if not (no right clicking in my app)
-    
+    ofxJSONElement TempAPI;
+    string APIstr;
+
     AllButtons Pressed = AllButtons::none;
-    for (int i = 0; i < Buttons.size(); i++) {
-        if (Buttons[i].second.inside(x, y)) {
-            Pressed = Buttons[i].first; //its an enum so idk
+    for (int i = 0; i < ButtonsCont.size(); i++) {
+        if (ButtonsCont[i].second.inside(x, y)) {
+            Pressed = ButtonsCont[i].first; //its an enum so idk
             break;
         }
     }
-    
+
     switch (Pressed) {
-    case AllButtons::none: 
+    case AllButtons::none:
         return;
     case AllButtons::Click2Play:
+        
         CurrPage = Pages::PickPokemon;
         TopRightBtn.load("Icon_Back.png");
+        PokemonLeft = 3;
+
+        Columns = 6; Rows = 5;
+        Gap = 5; StartX = 65; StartY = 400;
+        FrameX = (((80 * ScreenX) / 100) - (Gap * (Columns - 1))) / Columns; //Allocated space - Gaps / Number of Elements
+        FrameY = (((70 * ScreenY) / 100) - (Gap * (Rows - 1))) / Rows;
+
+        Offset = 0; Limit = Columns * Rows;
+        APIstr = "https://pokeapi.co/api/v2/evolution-chain/?offset=0&limit=" + to_string(Limit);
+        PokeAPI.open(APIstr);
+        cout << PokeAPI.getRawString() << endl;
+        PokeInPage.clear();
+        for (int i = 0; i < Limit; i++) {
+            TempAPI.open(PokeAPI["results"][i]["url"].asString());
+            TempAPI.open(TempAPI["chain"]["species"]["url"].asString());
+            PokeInPage.push_back(TempAPI["id"].asInt());
+        }
+        for (int i: PokeInPage){
+            cout << i << ", ";
+        }
         break;
     case AllButtons::TopRightBtn:
         switch (CurrPage) {
@@ -246,6 +239,7 @@ void ofApp::mousePressed(int x, int y, int button) {
             OF_EXIT_APP(0);
         case Pages::PickPokemon:
             CurrPage = Pages::MainMenu;
+            StaticImgLoader.load("PokeBattle_Logo.png");
             TopRightBtn.load("Icon_Close.png");
             break;
         case Pages::BattleScene:
@@ -268,6 +262,58 @@ void ofApp::mousePressed(int x, int y, int button) {
             DifficultyBtn.load("Icon_Diffculty_Easy.png");
             break;
         }
+        break;
+    case AllButtons::PrevPage:
+        Offset -= Limit;
+        if (Offset < 0) Offset = 0;
+        APIstr = "https://pokeapi.co/api/v2/evolution-chain/?offset=" + to_string(Offset) + "& limit = " + to_string(Limit);
+        PokeAPI.open(APIstr);
+        cout << PokeAPI.getRawString() << endl;
+        PokeInPage.clear();
+        for (int i = 0; i < Limit; i++) {
+            TempAPI.open(PokeAPI["results"][i]["url"].asString());
+            TempAPI.open(TempAPI["chain"]["species"]["url"].asString());
+            PokeInPage.push_back(TempAPI["id"].asInt());
+        }
+        for (int i : PokeInPage) {
+            cout << i << ", ";
+        }
+        /*for (int i = 0; i < Limit; i++){
+            TempAPI.open(PokeAPI["results"][i]["url"].asString());
+            APIstr = TempAPI["chain"]["species"]["url"].asString();
+            APIstr.erase(APIstr.end() - 1);
+            auto isoPokeNum = APIstr.rfind('/');
+            APIstr.substr(isoPokeNum + 1);
+            cout << APIstr << ", " << endl;
+        }*/
+        break;
+    case AllButtons::NextPage:
+        if (Offset + Limit > PokeAPI["count"].asInt()) break;
+        Offset += Limit;
+        APIstr = "https://pokeapi.co/api/v2/evolution-chain/?offset=" + to_string(Offset) + "& limit = " + to_string(Limit);
+        PokeAPI.open(APIstr);
+        cout << PokeAPI.getRawString() << endl;
+        PokeInPage.clear();
+        for (int i = 0; i < Limit; i++) {
+            TempAPI.open(PokeAPI["results"][i]["url"].asString());
+            TempAPI.open(TempAPI["chain"]["species"]["url"].asString());
+            PokeInPage.push_back(TempAPI["id"].asInt());
+        }
+        for (int i : PokeInPage) {
+            cout << i << ", ";
+        }
+        break;
+    case AllButtons::PokeSelectGrid:
+        if (PokeSelected.size() >= 6) {
+            cout << "Selection Full!" << endl;
+            if(PokeSelected.size() > 6) PokeSelected.resize(6); //hate to bug out this way
+            break;
+        }
+        x -= 10; y -= 180;
+        x /= FrameX; y /= FrameY;
+        cout << "Selected: x-" << x << " | y-" << y << " | PokemonNo-" << ((y * Columns + x) + Offset) << endl;
+        PokeSelected.push_back((y * Columns + x) + Offset);
+        break;
     default:
         break;
     }

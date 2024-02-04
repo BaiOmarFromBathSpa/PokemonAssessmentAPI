@@ -2,24 +2,23 @@
 
 #include "ofMain.h"
 #include "ofxJSON.h"
-#include "vector"
+#include <vector>
+#include <algorithm>
+#include <string>
 
-class DrawAnImage : public ofImage {
-	ofImage Picture;
-	ofRectangle HitBox;
-	int OffsetX, OffsetY, Width, Height; //not to maintain just writing these out
-	bool MaintainAspectRatio, isButton;
-	char AlignX, AlignY;
 
-	public:
-		DrawAnImage() {
-			Width = ofGetHeight();
-		};
+class MakeButton {
+	ofRectangle MyRect;
+public:
+	MakeButton(ofImage Picture) {
+		
+	};
+	MakeButton(ofRectangle Rectangle) {
+
+	};
 };
 
-
 class ofApp : public ofBaseApp {
-
 public:
 	void setup();
 	void update();
@@ -44,23 +43,35 @@ public:
 		none,
 		Click2Play,
 		TopRightBtn,
-		DifficultyBtn
+		DifficultyBtn,
+		PrevPage,
+		NextPage,
+		PokeSelectGrid,
+		Start
 	};
 
 	int PokeStreak;
 	int HintsRemaining;
 	int HighScore;
-	
+	int PokemonLeft;
+	int DifficultyOption;
+
+	vector<int> PokeInPage;
+	vector<int> PokeSelected;
+	int Offset, Limit;
+	int Columns, Rows;
+	int Gap, StartX, StartY;
+	int FrameX, FrameY; //Allocated space - Gaps / Number of Elements
+	int ScreenX, ScreenY;
+
 	ofxJSONElement PokeAPI;//stores data from API
 	ofColor Accent1, Accent2;
 
-	ofImage StaticImgLoader; // load images wih no function.... just to be looked at
+	ofImage StaticImgLoader; // load images that aren't buttons / animated
 	ofImage Click2Play;
 	ofImage TopRightBtn; //top right icon... could serve multiple functions based on page or state
 	ofImage DifficultyBtn;
 	
 	ofTrueTypeFont Font_Selector;
-	int DifficultyOption;
-
-	vector< pair<AllButtons, ofRectangle> > Buttons; 
+	vector< pair<AllButtons, ofRectangle> > ButtonsCont; 
 };
