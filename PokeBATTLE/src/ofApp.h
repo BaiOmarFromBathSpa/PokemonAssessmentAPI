@@ -49,7 +49,7 @@ public:
 			return PokeTypes::Normal;
 		}
 	}
-	Pokemon(string aName, int aNum, string Type1, string Type2) {
+	Pokemon(string aName, int aNum, string Type1, string Type2 = "none") {
 		PokeName = aName;
 		PokeNum = aNum;
 		PokeTyping = make_pair(setTyping(Type1), setTyping(Type2));

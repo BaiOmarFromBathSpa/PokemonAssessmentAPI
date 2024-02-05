@@ -28,7 +28,7 @@ void ofApp::setup() {
     string tempPokeType1, tempPokeType2;
     PokeSelected.reserve(6);
 
-    int MaxSelection = 22;
+    int MaxSelection = 74; //PLEASE CHANGE THIS VALUE, LOW FOR TESTING (HIGHER=SLOWER-LOAD)
     Columns = 6; Rows = 5;
     Gap = 5; StartX = 65; StartY = 400;
     FrameX = (((80 * ScreenX) / 100) - (Gap * (Columns - 1))) / Columns; //Allocated space - Gaps / Number of Elements
@@ -79,7 +79,7 @@ void ofApp::draw() {
         break;
     }
     ofSetColor(255); //reset colours after every page
-    cout << "page rendered\n"; // So ive come to realise using a static IMG saver to save on memory wasnt the right call... far too late to do much about it tho :/
+    //cout << "page rendered\n"; // So ive come to realise using a static IMG saver to save on memory wasnt the right call... far too late to do much about it tho :/
 }
 
 void ofApp::DrawBG(ofColor Col1, ofColor Col2) {
@@ -375,7 +375,10 @@ void ofApp::DrawPage3() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-    //OF_EXIT_APP(0);
+    cout << key << endl;
+    if ((key == 113 || key == 81) && (CurrPage == Pages::MainMenu || GamePaused)) {
+        OF_EXIT_APP(0);
+    }
 }
 
 //--------------------------------------------------------------
