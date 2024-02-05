@@ -21,6 +21,9 @@ public:
 	string PokeName;
 	int PokeNum;
 	pair <PokeTypes, PokeTypes> PokeTyping;
+	pair <string, string> strPokeTyping;
+	//pair <ofColor, ofColor> PokeTypingCol;
+
 	PokeTypes setTyping(string &Type) {
 		if (Type == "none") return PokeTypes::none;
 		else if (Type == "bug") return PokeTypes::Bug;
@@ -41,12 +44,16 @@ public:
 		else if (Type == "rock") return PokeTypes::Rock;
 		else if (Type == "steel") return PokeTypes::Steel;
 		else if (Type == "water") return PokeTypes::Water;
-		else return PokeTypes::none;
+		else {
+			Type = "normal";
+			return PokeTypes::Normal;
+		}
 	}
 	Pokemon(string aName, int aNum, string Type1, string Type2) {
 		PokeName = aName;
 		PokeNum = aNum;
 		PokeTyping = make_pair(setTyping(Type1), setTyping(Type2));
+		strPokeTyping = make_pair(Type1, Type2);
 	};
 };
 
@@ -81,7 +88,8 @@ public:
 		NextPage,
 		PokeSelectGrid,
 		PokeSelected,
-		Start
+		Start,
+		RevivePotion
 	};
 
 	int PokeStreak;
@@ -89,14 +97,19 @@ public:
 	int HighScore;
 	int PokemonLeft;
 	int DifficultyOption;
+	int CurrPoke;
+	pair <bool, bool> RevivePotion;
+	bool GamePaused;
 
 	vector<Pokemon> StarterPoke;
-	vector<int> PokeSelected;
+	vector<int> PokeSelected; //issues with iterator had to duplicate make a int vector instead of a "Pokemon" one
+	vector<Pokemon> PokeTeam;
 	int Offset, Limit;
 	int Columns, Rows;
 	int Gap, StartX, StartY;
 	int FrameX, FrameY; //Allocated space - Gaps / Number of Elements
 	int ScreenX, ScreenY;
+	int ReviveCount, PotionCount;
 
 	ofxJSONElement PokeAPI;//stores data from API
 	ofColor Accent1, Accent2;

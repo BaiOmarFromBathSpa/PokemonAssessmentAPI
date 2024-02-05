@@ -14,7 +14,7 @@ void ofApp::setup() {
     PokeStreak = 0;
     HintsRemaining = 4;
     HighScore = 9909;
-    PokeSelected.reserve(6);
+    CurrPoke = -1; //Pokeball
 
     StaticImgLoader.load("PokeBattle_Logo.png");
     Click2Play.load("Click2Play.png");
@@ -26,8 +26,9 @@ void ofApp::setup() {
     string APIstr;
     string tempName; int tempNum; 
     string tempPokeType1, tempPokeType2;
+    PokeSelected.reserve(6);
 
-    int MaxSelection = 100;
+    int MaxSelection = 22;
     Columns = 6; Rows = 5;
     Gap = 5; StartX = 65; StartY = 400;
     FrameX = (((80 * ScreenX) / 100) - (Gap * (Columns - 1))) / Columns; //Allocated space - Gaps / Number of Elements
@@ -54,6 +55,7 @@ void ofApp::setup() {
         Pokemon tempPokemon(tempName, tempNum-1, tempPokeType1, tempPokeType2);
         StarterPoke.push_back(tempPokemon);
     }
+    ofSetFrameRate(60);
 }
 
 //--------------------------------------------------------------
@@ -77,6 +79,7 @@ void ofApp::draw() {
         break;
     }
     ofSetColor(255); //reset colours after every page
+    cout << "page rendered\n"; // So ive come to realise using a static IMG saver to save on memory wasnt the right call... far too late to do much about it tho :/
 }
 
 void ofApp::DrawBG(ofColor Col1, ofColor Col2) {
@@ -127,8 +130,8 @@ void ofApp::DrawPage1() {
     Button.set(330, 380, 620, 220);
     ButtonsCont.push_back(make_pair(AllButtons::Click2Play, Button));
 
-    TopRightBtn.draw((ScreenX - TopRightBtn.getWidth() - 15), 15, TopRightBtn.getWidth(), 50);
-    Button.set((ScreenX - TopRightBtn.getWidth() - 15), 15, TopRightBtn.getWidth(), 50);
+    TopRightBtn.draw(1210, 15, TopRightBtn.getWidth(), 50);
+    Button.set(1210, 15, TopRightBtn.getWidth(), 50);
     ButtonsCont.push_back(make_pair(AllButtons::TopRightBtn, Button));
 
     DifficultyBtn.draw(1060, 465, 200, 65);
@@ -145,8 +148,8 @@ void ofApp::DrawPage2() {
     StaticImgLoader.load("PokeBattle_Logo.png");
     StaticImgLoader.draw(50, 10, 585, 135);
 
-    TopRightBtn.draw((ScreenX - TopRightBtn.getWidth() - 15), 15, TopRightBtn.getWidth(), 50);
-    Button.set((ScreenX - TopRightBtn.getWidth() - 15), 15, TopRightBtn.getWidth(), 50);
+    TopRightBtn.draw(1200, 15, TopRightBtn.getWidth(), 50);
+    Button.set(1200, 15, TopRightBtn.getWidth(), 50);
     ButtonsCont.push_back(make_pair(AllButtons::TopRightBtn, Button));
 
     ofSetColor(255);
@@ -183,8 +186,8 @@ void ofApp::DrawPage2() {
     for (int i = 0; i < PokeSelected.size(); i++) {
         string PokeLocation = "sprites/" + to_string(PokeSelected[i]) + "/back.png";
         StaticImgLoader.load(PokeLocation);
-        PokeBall.draw(5, ((ScreenY - 180) / 6) * i+10, (ScreenY - 180) / 6, (ScreenY - 180) / 6);
-        StaticImgLoader.draw(60, ((ScreenY - 180) / 6) * i - 25, 160, 160);
+        PokeBall.draw(20, ((ScreenY - 180) / 6) * i+10, (ScreenY - 180) / 6, (ScreenY - 180) / 6);
+        StaticImgLoader.draw(75, ((ScreenY - 180) / 6) * i - 25, 160, 160);
     }
     ofPopMatrix();
     Button.set(1050, 180, ScreenX - 1050, ScreenY - 180);
@@ -198,8 +201,9 @@ void ofApp::DrawPage2() {
             string PokeLocation = "sprites/" + to_string(StarterPoke[i * Columns + j + Offset].PokeNum) + "/front.png";
 
             Accent1.set(255);
-            auto it = find(PokeSelected.begin(), PokeSelected.end(), StarterPoke[i * Columns + j + Offset].PokeNum);
-            if (it != PokeSelected.end()) Accent1.set(0, 130, 255);
+            for (int k = 0; k < PokeSelected.size(); k++) {
+                if (PokeSelected[k] == StarterPoke[i * Columns + j + Offset].PokeNum) Accent1.set(0, 130, 255);
+            }
 
             StaticImgLoader.load(PokeLocation);
             ofSetColor(0);
@@ -210,6 +214,14 @@ void ofApp::DrawPage2() {
             ofDrawRectRounded(((FrameX + Gap) * j) + 3, ((FrameY + Gap) * i) + 3, FrameX - 6, FrameY - 6, 3);
             ofSetColor(255);
             StaticImgLoader.draw((FrameX + Gap) * j, (FrameY + Gap) * i, FrameX, FrameY);
+
+            StaticImgLoader.load("sprites/Types/" + StarterPoke[i * Columns + j + Offset].strPokeTyping.first + ".png");
+            StaticImgLoader.draw((FrameX + Gap) * j, (FrameY + Gap) * i+5, 60, 20);
+            StaticImgLoader.load("sprites/Types/" + StarterPoke[i * Columns + j + Offset].strPokeTyping.second + ".png");
+            StaticImgLoader.draw((FrameX + Gap) * j +FrameX-60, (FrameY + Gap) * i +FrameY-25, 60, 20);
+            ofSetColor(0);
+            Font_Selector.load("TurpisItalic.ttf", 12);
+            Font_Selector.drawString(StarterPoke[i * Columns + j + Offset].PokeName, (FrameX + Gap) * j + 5, (FrameY + Gap) * i + FrameY - 5);
         }
     }
     ofPopMatrix();
@@ -248,12 +260,122 @@ void ofApp::DrawPage2() {
 }
 
 void ofApp::DrawPage3() {
+    ofRectangle Button;
+    Accent1.set(75, 75, 75);
+    Accent2.set(75, 75, 75);
+    DrawBG(Accent1, Accent2);
 
+
+    ofSetColor(255, 255, 255);
+    Font_Selector.load("TurpisItalic.ttf", 40);
+    Font_Selector.drawString("Poke-Streak:", 39, 60);
+
+    Font_Selector.load("TurpisItalic.ttf", 24);
+    Font_Selector.drawString("Hints:", 34, 90);
+
+    ofSetColor(255, 255, 255);
+    Font_Selector.load("TurpisItalic.ttf", 36);
+    Font_Selector.drawString("Hi-Sco:", 25, 130);
+
+    ofSetColor(222, 90, 58);
+    Font_Selector.load("TurpisItalic.ttf", 96);
+    Font_Selector.drawString(to_string(PokeStreak), 380, 110);
+
+    Font_Selector.load("TurpisItalic.ttf", 55);
+    Font_Selector.drawString(to_string(0000), 195, 133);
+
+    Font_Selector.load("TurpisItalic.ttf", 26);
+    Font_Selector.drawString(to_string(HintsRemaining), 132, 92);
+
+    ofSetColor(0);
+        ofFill();
+        ofDrawRectRounded(500, 75, 340, 125, 20);
+    ofSetColor(75);
+        ofFill();
+        ofSetCircleResolution(30);
+        ofDrawEllipse(1030, 310, 350, 120);
+        ofDrawEllipse(260, 690, 480, 180);
+    ofSetColor(255);
+        ofDrawRectRounded(502, 77, 336, 121, 18);
+        ofDrawEllipse(1028, 308, 350, 120);
+        ofDrawEllipse(256, 686, 480, 180);
+    
+    PokeBall.draw(120, 500, 250, 250);
+
+    ofPushMatrix();
+    ofTranslate(750, 500);
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 3; j++) {
+            if ((i * 3 + j + 1) > PokeTeam.size()) break;
+            string PokeLocation = "sprites/" + to_string(PokeTeam[i * 3 + j].PokeNum) + "/front.png";
+                
+            StaticImgLoader.load(PokeLocation);
+            ofSetColor(0);
+            ofFill();
+            ofDrawRectRounded((FrameX + Gap) * j, (FrameY + Gap) * i, FrameX, FrameY, 4);
+            ofSetColor(255);
+            ofFill();
+            ofDrawRectRounded(((FrameX + Gap) * j) + 3, ((FrameY + Gap) * i) + 3, FrameX - 6, FrameY - 6, 3);
+            StaticImgLoader.draw((FrameX + Gap) * j, (FrameY + Gap) * i, FrameX, FrameY);
+
+            StaticImgLoader.load("sprites/Types/" + PokeTeam[i * 3 + j].strPokeTyping.first + ".png");
+            StaticImgLoader.draw((FrameX + Gap) * j, (FrameY + Gap) * i + 5, 60, 20);
+            StaticImgLoader.load("sprites/Types/" + PokeTeam[i * 3 + j].strPokeTyping.second + ".png");
+            StaticImgLoader.draw((FrameX + Gap) * j + FrameX - 60, (FrameY + Gap) * i + FrameY - 25, 60, 20);
+            ofSetColor(0);
+            Font_Selector.load("TurpisItalic.ttf", 12);
+            Font_Selector.drawString(PokeTeam[i * 3 + j].PokeName, (FrameX + Gap) * j+5, (FrameY + Gap) * i + FrameY - 5);
+        }
+    }
+    ofPopMatrix();
+    ofSetColor(255);
+    Button.set(1210, 15, TopRightBtn.getWidth(), 50);
+
+    ofPushMatrix();
+    ofTranslate(680, 500);
+        if (RevivePotion.first) {
+            ofSetColor(230,230, 125);
+            ofDrawRectangle(5, 0, 60, 100);
+            ofSetColor(255);
+            ofDrawRectangle(7, 2, 56, 96);
+        } else if (RevivePotion.second) {
+            ofSetColor(130,100,175);
+            ofDrawRectangle(5, 100, 60, 100);
+            ofSetColor(255);
+            ofDrawRectangle(7, 102, 56, 96);
+        }
+
+        StaticImgLoader.load("sprites/Revive.png");
+        StaticImgLoader.draw(0, 0, 70, 70);
+        StaticImgLoader.load("sprites/Potion.png");
+        StaticImgLoader.draw(10, 110, 50, 50);
+        ofSetColor(0);
+        Font_Selector.load("TurpisItalic.ttf", 24);
+        Font_Selector.drawString(to_string(ReviveCount), 22, 90);
+        Font_Selector.drawString(to_string(PotionCount), 22, 190);
+    ofPopMatrix();
+    ofSetColor(255);
+    Button.set(685, 500, 60, 200);
+    ButtonsCont.push_back(make_pair(AllButtons::RevivePotion, Button));
+
+
+
+    if (GamePaused) {
+        ButtonsCont.clear();
+        TopRightBtn.load("Icon_Pause.png");
+        TopRightBtn.draw(525, 200, 235, 300);
+        Button.set(525, 200, 235, 300);
+        ButtonsCont.push_back(make_pair(AllButtons::TopRightBtn, Button));
+        TopRightBtn.load("Icon_Play.png");
+    }
+    TopRightBtn.draw(1210, 15, TopRightBtn.getWidth(), 50);
+    Button.set(1210, 15, TopRightBtn.getWidth(), 50);
+    ButtonsCont.push_back(make_pair(AllButtons::TopRightBtn, Button));
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-    OF_EXIT_APP(0);
+    //OF_EXIT_APP(0);
 }
 
 //--------------------------------------------------------------
@@ -278,12 +400,16 @@ void ofApp::mousePressed(int x, int y, int button) {
 
     switch (Pressed) {
     case AllButtons::none:
-        return;
+        //if (CurrPage == Pages::BattleScene && (RevivePotion.first || RevivePotion.second)) {
+        //    RevivePotion.first = false;
+        //    RevivePotion.second = false;
+        //}
+        break;
     case AllButtons::Click2Play:
         CurrPage = Pages::PickPokemon;
         TopRightBtn.load("Icon_Back.png");
         PokemonLeft = 6;
-        PokeSelected.clear();
+        //PokeSelected.clear();
         Offset = 0;
         break;
     case AllButtons::TopRightBtn:
@@ -296,6 +422,11 @@ void ofApp::mousePressed(int x, int y, int button) {
             TopRightBtn.load("Icon_Close.png");
             break;
         case Pages::BattleScene:
+            if (GamePaused) {
+                GamePaused = false;
+                TopRightBtn.load("Icon_Pause.png");
+            }
+            else GamePaused = true;
             break;
         }
         break;
@@ -345,7 +476,37 @@ void ofApp::mousePressed(int x, int y, int button) {
     case AllButtons::Start:
         CurrPage = Pages::BattleScene;
         TopRightBtn.load("Icon_Pause.png");
-        PokemonLeft = 6;
+        PokemonLeft = 6; ReviveCount = 5; PotionCount = 10;
+        RevivePotion = make_pair(false, false);
+        GamePaused = false;
+
+        for (int i: PokeSelected) {
+            TempAPI.open("https://pokeapi.co/api/v2/pokemon/" + to_string(i+1));
+            string Type2 = "none";
+            if (TempAPI["types"].size() > 1) Type2 = TempAPI["types"][1]["type"]["name"].asString();
+            string tempStr = TempAPI["name"].asString();
+            Pokemon tempPokemon = {
+                TempAPI["name"].asString(), i,
+                TempAPI["types"][0]["type"]["name"].asString(),
+                Type2
+            };
+            PokeTeam.push_back(tempPokemon);
+            cout << i << " - ";
+            cout << TempAPI["name"].asString() << endl;
+        }
+        break;
+    case AllButtons::RevivePotion:
+        y -= 550;
+        y /= (ScreenY - 550) / 2;
+        if (RevivePotion.first) {
+            RevivePotion.first = false;
+            if (PotionCount > 0 && y == 1) RevivePotion.second = true;
+        } else if (RevivePotion.second) {
+            RevivePotion.second = false;
+            if (ReviveCount > 0 && y == 0) RevivePotion.first = true;
+        }
+        else if (y == 0 && ReviveCount > 0) RevivePotion.first = true;
+        else if (y == 1 && PotionCount > 0) RevivePotion.second = true;
         break;
     default:
         break;
